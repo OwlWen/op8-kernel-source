@@ -38,10 +38,11 @@ jobs:
         sudo apt install binutils wget make python2 libssl-dev build-essential bc bison flex unzip libssl-dev ca-certificates xz-utils mkbootimg cpio device-tree-compiler git git-lfs -y
         sudo rm /usr/bin/python
         sudo ln -s /usr/bin/python2.7 /usr/bin/python
-        wget https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/LLVM-19.1.7-Linux-X64.tar.xz
-        tar -xf LLVM-19.1.7-Linux-X64.tar.xz
+        https://github.com/tomxi1997/op8-kernel-source/releases/download/v1/Horizon-Clang-16.0.6.tar.xz
+        sudo mkdir -p /clang
+        sudo tar -xJvf Horizon-Clang-16.0.6.tar.xz -C /clang
         git clone https://github.com/tomxi1997/AnyKernel3.git --depth=1
-        rm -rf AnyKernel3/.git LLVM-19.1.7-Linux-X64.tar.xz
+        rm -rf AnyKernel3/.git *.tar.xz
     
     - name: GetTime
       id: get_time
@@ -50,7 +51,7 @@ jobs:
 
     - name: Build SUkiSU
       run: |
-       export PATH=$(pwd)/LLVM-19.1.7-Linux-X64/bin:$PATH
+       export PATH=/clang/bin:$PATH
        export ARCH=arm64
        export SUBARCH=arm64
        curl -LSs "https://raw.githubusercontent.com/ShirkNeko/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-dev
