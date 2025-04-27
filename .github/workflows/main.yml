@@ -38,7 +38,7 @@ jobs:
         sudo apt install binutils wget make python2 libssl-dev build-essential bc bison flex unzip libssl-dev ca-certificates xz-utils mkbootimg cpio device-tree-compiler git git-lfs -y
         sudo rm /usr/bin/python
         sudo ln -s /usr/bin/python2.7 /usr/bin/python
-        https://github.com/tomxi1997/op8-kernel-source/releases/download/v1/Horizon-Clang-16.0.6.tar.xz
+        wget https://github.com/tomxi1997/op8-kernel-source/releases/download/v1/Horizon-Clang-16.0.6.tar.xz
         sudo mkdir -p /clang
         sudo tar -xJvf Horizon-Clang-16.0.6.tar.xz -C /clang
         git clone https://github.com/tomxi1997/AnyKernel3.git --depth=1
