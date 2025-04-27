@@ -1,0 +1,65 @@
+name: Build samsung-note8-exynos8895-ONEUI-Kernel
+on:
+  workflow_dispatch:
+  schedule:
+      # Run once a week on Sunday at midnight. See http://crontab.guru
+      - cron: '0 8 */15 * *'
+  push:
+    branches:
+      - HEAD
+  pull_request:
+      branches:
+      - HEAD
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    env:
+      CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
+      CCACHE_NOHASHDIR: "true"
+      CCACHE_MAXSIZE: "2G"
+      CCACHE_HARDLINK: "true"
+      KERNEL_CMDLINE: "CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- ARCH=arm64  LD=ld.lld AR=llvm-ar NM=llvm-nm STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump READELF=llvm-readelf SUBARCH=arm64 O=out"
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 100
+
+    - name: Set up ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update -y 
+        sudo apt install gcc-aarch64-linux-gnu -y
+        sudo apt install gcc-arm-linux-gnueabi -y
+        sudo apt install binutils wget make python3 libssl-dev build-essential bc bison flex unzip libssl-dev ca-certificates xz-utils mkbootimg cpio device-tree-compiler git git-lfs -y
+        wget https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/LLVM-19.1.7-Linux-X64.tar.xz
+        tar -xf LLVM-19.1.7-Linux-X64.tar.xz
+        git clone https://github.com/tomxi1997/AnyKernel3.git --depth=1
+        rm -rf AnyKernel3/.git LLVM-19.1.7-Linux-X64.tar.xz
+    
+    - name: GetTime
+      id: get_time
+      run: |
+        echo "TIME=$(TZ=UTC-8 date +%m%d%H%M )" >> $GITHUB_OUTPUT
+
+    - name: Build SUkiSU
+      run: |
+       export PATH=$(pwd)/LLVM-19.1.7-Linux-X64/bin:$PATH
+       export ARCH=arm64
+       export SUBARCH=arm64
+       curl -LSs "https://raw.githubusercontent.com/ShirkNeko/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-dev
+       make $KERNEL_CMDLINE instantnoodlep_defconfig
+       make $KERNEL_CMDLINE -j$(nproc --all)
+       cp out/arch/arm64/boot/Image.gz AnyKernel3
+       cp -rf ./out/arch/arm64/boot/dts/vendor/qcom/kona-v2.1.dtb  AnyKernel3/dtb
+       
+    - name: Upload Kernel 
+      uses: actions/upload-artifact@v4
+      with:
+        name: Kernel-SukiSU-LXC-op8p-H2OS-R-${{ steps.get_time.outputs.TIME }}
+        path: "AnyKernel3/*"
+
