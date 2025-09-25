@@ -1,4 +1,4 @@
-name: Build Op8pro-Kernelsu-Kernel
+name: Build Op8t-Kernelsu-Kernel
 on:
   workflow_dispatch:
   schedule:
@@ -49,14 +49,14 @@ jobs:
       run: |
         echo "TIME=$(TZ=UTC-8 date +%m%d%H%M )" >> $GITHUB_OUTPUT
 
-    - name: Build SUkiSU
+    - name: Build KernelSU
       run: |
        export PATH=/clang/bin:$PATH
        export ARCH=arm64
        export SUBARCH=arm64
-       #curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next/kernel/setup.sh" | bash -
+       curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next/kernel/setup.sh" | bash -
        #curl -LSs "https://raw.githubusercontent.com/ShirkNeko/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-dev
-       curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s nongki
+       #curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s nongki
        make $KERNEL_CMDLINE CC="ccache clang" instantnoodlep_defconfig
        make $KERNEL_CMDLINE CC="ccache clang" -j$(nproc --all)
        cp out/arch/arm64/boot/Image.gz AnyKernel3
@@ -65,6 +65,6 @@ jobs:
     - name: Upload Kernel 
       uses: actions/upload-artifact@v4
       with:
-        name: Kernel-SukiSU-LXC-op8p-H2OS-R-${{ steps.get_time.outputs.TIME }}
+        name: Kernel-SukiSU-LXC-op8t-H2OS-R-${{ steps.get_time.outputs.TIME }}
         path: "AnyKernel3/*"
 
